@@ -139,7 +139,8 @@ function insertRecommendOnenight(connection,req,res,callback){
   var sdate=new Date(req.body.start_date);                         //클라이언트에서 format을 "2017/1/4" 이런식으로 맞춰서 보내달라고 하기.
   var edate=new Date(req.body.end_date);
   var onenight=edate.getTime()/(1000*60*60*24)-sdate.getTime()/(1000*60*60*24)+1;
-  for(var i=0;i<onenight;i++){       // recommend_onenight에 insert
+  var scheduleArray=req.body.schedule;
+  for(var i=0;i<scheduleArray.length;i++){       // recommend_onenight에 insert
     ri=i;
     console.log("aaaaaaaaaaaaaaaaaaaaaaaa "+i);
     connection.query("insert into recommend_onenight(recommend_id_fk,day) select recommend_id,'?' from user,recommend where user_id=? && user_id=user_id_fk",[(i+1),req.body.user_id],function(error, rows){
@@ -159,7 +160,7 @@ function insertRecommendOnenight(connection,req,res,callback){
 function insertRecommendOnenightRoute(connection,req,res,callback){
   var schedule=req.body.schedule;
   console.log("user_id: "+req.body.user_id);
-  connection.query("select onenight_id from user,recommend,recommend_onenight where user_id=? && user_id=user_id_fk && recommend_id=recommend_id_fk",[req.body.user_id],function(error, rows){
+  connection.query("select distinct onenight_id from user,recommend,recommend_onenight where user_id=? && user_id=user_id_fk && recommend_id=recommend_id_fk",[req.body.user_id],function(error, rows){
     if (error){
       console.log("Connection Error3" + error);
       res.sendStatus(500);
@@ -169,6 +170,9 @@ function insertRecommendOnenightRoute(connection,req,res,callback){
       console.log("schedule"+schedule);
       console.log("schedule.length: "+schedule.length);
       console.log("rows.length: "+rows.length);
+      for(var i=0;i<rows.length;i++){
+        console.log("rows[i].onenight_id: "+rows[i].onenight_id);
+      }
       for(var i=0;i<rows.length;i++){
         //var realnight=rows[i].onenight;
         for(var j=0;j<schedule[i].length;j++){
